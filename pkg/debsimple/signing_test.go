@@ -74,7 +74,7 @@ func TestCreateRelease(t *testing.T) {
 		t.Errorf("error writing copy of package file: %s", err)
 	}
 
-	createKeyHandler(pwd+"/testing", "deb-simple test", "blah@blah.com")
+	CreateKey(pwd+"/testing", "deb-simple test", "blah@blah.com")
 	if err := createRelease(config, "stable"); err != nil {
 		t.Errorf("error creating Releases file: %s", err)
 	}
@@ -101,7 +101,7 @@ func TestCreateKey(t *testing.T) {
 		t.Errorf("error creating directory: %s\n", err)
 	}
 
-	createKeyHandler(pwd+"/testing", "deb-simple Test", "deb-simple@go.go")
+	CreateKey(pwd+"/testing", "deb-simple Test", "deb-simple@go.go")
 
 	privateKey, err := os.Stat("testing/private.key")
 	if os.IsNotExist(err) {
@@ -136,7 +136,7 @@ func TestSignRelease(t *testing.T) {
 		t.Errorf("Unable to get current working directory: %s", err)
 	}
 
-	createKeyHandler(pwd+"/testing", "deb-simple Test", "deb-simple@go.go")
+	CreateKey(pwd+"/testing", "deb-simple Test", "deb-simple@go.go")
 
 	config := Conf{ListenPort: "9666", RootRepoPath: pwd + "/testing", SupportArch: []string{"cats"}, DistroNames: []string{"stable"}, Sections: []string{"main"}, EnableSSL: false, EnableSigning: true, PrivateKey: pwd + "/testing/private.key"}
 

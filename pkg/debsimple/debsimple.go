@@ -88,18 +88,6 @@ func CreateMetadata(name string, parsedconfig Conf) {
 	}
 }
 
-func GenerateSigningKey(keyName, keyEmail *string) {
-	workingDirectory, err := os.Getwd()
-	if err != nil {
-		log.Fatalf("Unable to get current working directory: %s", err)
-	}
-	fmt.Println("Generating new signing key pair..")
-	fmt.Printf("Name: %s\n", *keyName)
-	fmt.Printf("Email: %s\n", *keyEmail)
-	createKeyHandler(workingDirectory, *keyName, *keyEmail)
-	fmt.Println("Done.")
-}
-
 func destructPath(filePath string) []string {
 	splitPath := strings.Split(filePath, "/")
 	archFull := splitPath[len(splitPath)-2]
@@ -115,7 +103,6 @@ func createDirs(config Conf) error {
 			for _, section := range config.Sections {
 				if _, err := os.Stat(config.ArchPath(distro, section, arch)); err != nil {
 					if os.IsNotExist(err) {
-						log.Printf("Directory for %s (%s) does not exist, creating", distro, arch)
 						if err := os.MkdirAll(config.ArchPath(distro, section, arch), 0755); err != nil {
 							return fmt.Errorf("error creating directory for %s (%s): %s", distro, arch, err)
 						}
@@ -123,7 +110,6 @@ func createDirs(config Conf) error {
 						return fmt.Errorf("error inspecting %s (%s): %s", distro, arch, err)
 					}
 				}
-				log.Println("starting watcher for ", config.ArchPath(distro, section, arch))
 				err := mywatcher.Add(config.ArchPath(distro, section, arch))
 				if err != nil {
 					return fmt.Errorf("error creating watcher for %s (%s): %s", distro, arch, err)
