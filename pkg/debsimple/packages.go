@@ -25,10 +25,6 @@ func inspectPackage(filename string) (string, error) {
 		return "", fmt.Errorf("error opening package file %s: %s", filename, err)
 	}
 
-	if *verbose {
-		log.Printf("Inpecting package file \"%s\"", filename)
-	}
-
 	arReader := ar.NewReader(f)
 	defer f.Close()
 	var controlBuf bytes.Buffer
@@ -46,9 +42,6 @@ func inspectPackage(filename string) (string, error) {
 
 		if strings.TrimRight(header.Name, "/") == "control.tar.gz" {
 			io.Copy(&controlBuf, arReader)
-			if *verbose {
-				log.Println("\t Found a package control file")
-			}
 			return inspectPackageControl(controlBuf)
 		}
 
@@ -96,10 +89,6 @@ func inspectPackageControl(filename bytes.Buffer) (string, error) {
 }
 
 func createPackagesGz(config Conf, distro, section, arch string) error {
-
-	if *verbose {
-		log.Printf("Rebuilding Packages.gz file for %s %s %s", distro, section, arch)
-	}
 
 	packageFile, err := os.Create(filepath.Join(config.ArchPath(distro, section, arch), "Packages"))
 	if err != nil {

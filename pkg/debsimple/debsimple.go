@@ -1,9 +1,6 @@
 package debsimple
 
 import (
-	"crypto/rand"
-	"encoding/base64"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -11,9 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
-	"github.com/boltdb/bolt"
-	"github.com/fsnotify/fsnotify"
 )
 
 type Conf struct {
@@ -30,25 +24,13 @@ func (c Conf) ArchPath(distro, section, arch string) string {
 }
 
 var (
-	verbose   *bool
-	mywatcher *fsnotify.Watcher
-
 	// Now is a package level time function so we can mock it out
 	Now = func() time.Time {
 		return time.Now()
 	}
 )
 
-func Main(parsedconfig Conf, verbosev *bool) {
-	var err error
-	verbose = verbosev
-
-	// fire up filesystem watcher
-	mywatcher, err = fsnotify.NewWatcher()
-	if err != nil {
-		log.Fatal("error creating fswatcher: ", err)
-	}
-
+func Main(parsedconfig Conf) {
 	if err := createDirs(parsedconfig); err != nil {
 		log.Println(err)
 		log.Fatalf("error creating directory structure, exiting")
@@ -110,45 +92,8 @@ func createDirs(config Conf) error {
 						return fmt.Errorf("error inspecting %s (%s): %s", distro, arch, err)
 					}
 				}
-				err := mywatcher.Add(config.ArchPath(distro, section, arch))
-				if err != nil {
-					return fmt.Errorf("error creating watcher for %s (%s): %s", distro, arch, err)
-				}
 			}
 		}
 	}
 	return nil
-}
-
-func openDB() *bolt.DB {
-	// open/create database for API keys
-	db, err := bolt.Open("debsimple.db", 0600, &bolt.Options{Timeout: 1 * time.Second})
-	if err != nil {
-		log.Fatal("unable to open database: ", err)
-	}
-
-	return db
-}
-
-func createAPIkey(db *bolt.DB) (string, error) {
-	randomBytes := make([]byte, 32)
-	_, err := rand.Read(randomBytes)
-	if err != nil {
-		return "", err
-	}
-	apiKey := base64.URLEncoding.EncodeToString(randomBytes)
-
-	err = db.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("APIkeys"))
-		if b == nil {
-			return errors.New("Database bucket \"APIkeys\" does not exist")
-		}
-
-		err = b.Put([]byte(apiKey), []byte(apiKey))
-		return err
-	})
-	if err != nil {
-		return "", err
-	}
-	return apiKey, nil
 }

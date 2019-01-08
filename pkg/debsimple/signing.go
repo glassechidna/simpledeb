@@ -23,10 +23,6 @@ import (
 // Both Packages and Packages.gz files are included and hashed.
 func createRelease(config Conf, distro string) error {
 
-	if *verbose {
-		log.Printf("Creating release file for \"%s\"", distro)
-	}
-
 	workingDirectory := filepath.Join(config.RootRepoPath, "dists", distro)
 
 	outfile, err := os.Create(filepath.Join(workingDirectory, "Release"))
@@ -107,10 +103,6 @@ func createRelease(config Conf, distro string) error {
 // Both Release.gpg (detached signature) and InRelease (inline signature) will be generated, in order to
 // ensure maximum compatibility
 func signRelease(config Conf, filename string) error {
-
-	if *verbose {
-		log.Printf("Signing release file \"%s\"", filename)
-	}
 
 	entity := createEntityFromPrivateKey(config.PrivateKey)
 

@@ -50,8 +50,7 @@ func build(key, output, distro, section string, debs []string) {
 		EnableSigning: true,
 	}
 
-	verbose := false
-	debsimple.Main(c, &verbose)
+	debsimple.Main(c)
 
 	for _, deb := range debs {
 		arch := guessArchitecture(deb)
