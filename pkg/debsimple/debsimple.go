@@ -7,11 +7,9 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/boltdb/bolt"
@@ -19,15 +17,10 @@ import (
 )
 
 type Conf struct {
-	ListenPort    string   `json:"listenPort"`
 	RootRepoPath  string   `json:"rootRepoPath"`
 	SupportArch   []string `json:"supportedArch"`
 	Sections      []string `json:"sections"`
 	DistroNames   []string `json:"distroNames"`
-	EnableSSL     bool     `json:"enableSSL"`
-	SSLCert       string   `json:"SSLcert"`
-	SSLKey        string   `json:"SSLkey"`
-	EnableAPIKeys bool     `json:"enableAPIKeys"`
 	EnableSigning bool     `json:"enableSigning"`
 	PrivateKey    string   `json:"privateKey"`
 }
@@ -59,27 +52,6 @@ func Main(parsedconfig Conf, verbosev *bool) {
 	if err := createDirs(parsedconfig); err != nil {
 		log.Println(err)
 		log.Fatalf("error creating directory structure, exiting")
-	}
-}
-
-func KeepMetadataUpdated(mutex sync.Mutex, verbose *bool, parsedconfig Conf) {
-	for {
-		select {
-		case event := <-mywatcher.Events:
-			if (event.Op&fsnotify.Write == fsnotify.Write) || (event.Op&fsnotify.Remove == fsnotify.Remove) {
-				mutex.Lock()
-				name := event.Name
-				if filepath.Ext(name) == ".deb" {
-					if *verbose {
-						log.Println("Event: ", event)
-					}
-					CreateMetadata(name, parsedconfig)
-				}
-				mutex.Unlock()
-			}
-		case err := <-mywatcher.Errors:
-			log.Println("error:", err)
-		}
 	}
 }
 
@@ -116,22 +88,6 @@ func CreateMetadata(name string, parsedconfig Conf) {
 	}
 }
 
-func ServeWeb(parsedconfig Conf, db *bolt.DB) {
-	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir(parsedconfig.RootRepoPath))))
-	http.Handle("/upload", uploadHandler(parsedconfig, db))
-	http.Handle("/delete", deleteHandler(parsedconfig, db))
-	if parsedconfig.EnableSigning {
-		log.Println("Release signing is enabled")
-	}
-	if parsedconfig.EnableSSL {
-		log.Println("running with SSL enabled")
-		log.Fatal(http.ListenAndServeTLS(":"+parsedconfig.ListenPort, parsedconfig.SSLCert, parsedconfig.SSLKey, nil))
-	} else {
-		log.Println("running without SSL enabled")
-		log.Fatal(http.ListenAndServe(":"+parsedconfig.ListenPort, nil))
-	}
-}
-
 func GenerateSigningKey(keyName, keyEmail *string) {
 	workingDirectory, err := os.Getwd()
 	if err != nil {
@@ -142,31 +98,6 @@ func GenerateSigningKey(keyName, keyEmail *string) {
 	fmt.Printf("Email: %s\n", *keyEmail)
 	createKeyHandler(workingDirectory, *keyName, *keyEmail)
 	fmt.Println("Done.")
-}
-
-func CreateDb() *bolt.DB {
-	db := openDB()
-	// create DB bucket if needed
-	err := db.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte("APIkeys"))
-		if err != nil {
-			return err
-		}
-		return nil
-	})
-	if err != nil {
-		log.Fatal("unable to create database bucket: ", err)
-	}
-	return db
-}
-
-func GenerateKey(db *bolt.DB) {
-	fmt.Println("Generating API key...")
-	tempKey, err := createAPIkey(db)
-	if err != nil {
-		log.Fatal("unable to generate API key: ", err)
-	}
-	fmt.Println("key: ", tempKey)
 }
 
 func destructPath(filePath string) []string {

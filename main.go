@@ -3,18 +3,14 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"github.com/boltdb/bolt"
 	"github.com/esell/deb-simple/pkg/debsimple"
 	"io/ioutil"
 	"log"
 	"os"
-	"sync"
 )
 
 var (
-	mutex              sync.Mutex
 	configFile         = flag.String("c", "conf.json", "config file location")
-	generateKey        = flag.Bool("g", false, "generate an API key")
 	generateSigningKey = flag.Bool("k", false, "Generate a signing key pair")
 	keyName            = flag.String("kn", "", "Name for the siging key")
 	keyEmail           = flag.String("ke", "", "Email address")
@@ -26,7 +22,6 @@ func populateDefaultConfig() {
 	dir, _ := os.Getwd()
 
 	parsedconfig = debsimple.Conf{
-		ListenPort: "9090",
 		RootRepoPath: dir,
 		SupportArch: []string{"i386", "amd64"},
 		DistroNames: []string{"stable"},
@@ -48,23 +43,12 @@ func main() {
 		}
 	}
 
-	var db *bolt.DB
-	if parsedconfig.EnableAPIKeys || *generateKey {
-		db = debsimple.CreateDb()
-	}
-
-	// generate API key and exit
-	if *generateKey {
-		debsimple.GenerateKey(db)
-		os.Exit(0)
-	}
-
 	if *generateSigningKey {
 		debsimple.GenerateSigningKey(keyName, keyEmail)
 		os.Exit(0)
 	}
 
 	debsimple.Main(parsedconfig, verbose)
-	go debsimple.KeepMetadataUpdated(mutex, verbose, parsedconfig)
-	debsimple.ServeWeb(parsedconfig, db)
+	newpath := debsimple.CopyDeb("/Users/aidan.steele/Downloads/sshst_v0.0.5-next_linux_amd64.deb", parsedconfig, "stable", "main", "amd64")
+	debsimple.CreateMetadata(newpath, parsedconfig)
 }
