@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/esell/deb-simple.svg?branch=master)](https://travis-ci.org/esell/deb-simple)
-[![Coverage Status](https://coveralls.io/repos/github/esell/deb-simple/badge.svg?branch=master)](https://coveralls.io/github/esell/deb-simple?branch=master)
+[![Build Status](https://travis-ci.org/aidansteele/simpledeb.svg?branch=master)](https://travis-ci.org/aidansteele/simpledeb)
+[![Coverage Status](https://coveralls.io/repos/github/aidansteele/simpledeb/badge.svg?branch=master)](https://coveralls.io/github/aidansteele/simpledeb?branch=master)
 
 
 # deb-simple (get it? dead simple.. deb simple...)

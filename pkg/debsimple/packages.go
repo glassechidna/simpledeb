@@ -1,4 +1,4 @@
-package debsimple
+package simpledeb
 
 import (
 	"archive/tar"

@@ -4,6 +4,6 @@ conf.json
 bin/
 vendor.orig/
 deb-simple
-debsimple.db
+simpledeb.db
 build-stuff/
 testing

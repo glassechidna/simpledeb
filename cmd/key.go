@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/esell/deb-simple/pkg/debsimple"
+	"github.com/aidansteele/simpledeb/pkg/simpledeb"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"io/ioutil"
@@ -32,7 +32,7 @@ func init() {
 }
 
 func key(name, email, pub, priv string) {
-	keys := debsimple.CreateKey(name, email)
+	keys := simpledeb.CreateKey(name, email)
 	ioutil.WriteFile(pub, keys.PublicKey, 0644)
 	ioutil.WriteFile(priv, keys.PrivateKey, 0600)
 }

@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/esell/deb-simple/pkg/debsimple"
+	"github.com/aidansteele/simpledeb/pkg/simpledeb"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"os"
@@ -41,7 +41,7 @@ index.
 }
 
 func build(key, output, distro, section string, debs []string) {
-	c := debsimple.Conf{
+	c := simpledeb.Conf{
 		RootRepoPath:  output,
 		SupportArch:   []string{"i386", "amd64"},
 		DistroNames:   []string{distro},
@@ -50,12 +50,12 @@ func build(key, output, distro, section string, debs []string) {
 		EnableSigning: true,
 	}
 
-	debsimple.Main(c)
+	simpledeb.Main(c)
 
 	for _, deb := range debs {
 		arch := guessArchitecture(deb)
-		newpath := debsimple.CopyDeb(deb, c, distro, section, arch)
-		debsimple.CreateMetadata(newpath, c)
+		newpath := simpledeb.CopyDeb(deb, c, distro, section, arch)
+		simpledeb.CreateMetadata(newpath, c)
 		fmt.Fprintf(os.Stderr, "Processed %s\n", deb)
 	}
 }
