@@ -1,102 +1,54 @@
-[![Build Status](https://travis-ci.org/aidansteele/simpledeb.svg?branch=master)](https://travis-ci.org/aidansteele/simpledeb)
-[![Coverage Status](https://coveralls.io/repos/github/aidansteele/simpledeb/badge.svg?branch=master)](https://coveralls.io/github/aidansteele/simpledeb?branch=master)
+# simpledeb
 
+`simpledeb` aims to be the simplest way to create an apt repo from a collection
+of `.deb` files. It can be run from any platform and has no dependencies. Typical
+usage is:
 
-# deb-simple (get it? dead simple.. deb simple...)
-
-A lightweight, bare-bones apt repository server. 
-
-# Purpose
-
-This project came from a need I had to be able to serve up already created deb packages without a lot of fuss. Most of the existing solutions 
-I found were either geared at mirroring existing "official" repos or for providing your packages to the public. My need was just something that 
-I could use internally to install already built deb packages via apt-get. I didn't care about change files, signed packages, etc. Since this was 
-to be used in a CI pipeline it had to support remote uploads and be able to update the package list after each upload.
-
-# What it does:
-
-- Supports multiple versions of packages 
-- Supports multi-arch repos (i386, amd64, custom, etc)
-- Supports uploading via HTTP/HTTPS POST requests
-- Supports removing packages via HTTP/HTTPS DELETE requests
-- Does NOT require a changes file
-- Supports uploads from various locations without corrupting the repo
-- Supports API keys to protect who can upload/delete packages
-- Supports signing package release files
-
-# What it doesn't do:
-- Create actual packages
-- Mirror existing repos
-
-
-# General Usage:
-
-__This project is now using the native Go vendoring feature so you will need to build with Go >1.7 or if using 1.5/1.6 you will need to make sure `GO15VENDOREXPERIMENT` is set to `1`.__
-
-If you do not want to build from source you can just download a pre-built binary from the Releases section.
-
-Fill out the conf.json file with the values you want, it should be pretty self-explanatory, then fire it up!
-
-Once it is running POST a file to the `/upload` endpoint:
-
-`curl -XPOST 'http://localhost:9090/upload?arch=amd64&distro=stable&section=main' -F "file=@myapp.deb"`
-
-Or delete an existing file:
-
-`curl -XDELETE 'http://localhost:9090/delete' -d '{"filename":"myapp.deb","distroName":"stable","arch":"amd64", "section":"main"}'`
-
-To use your new repo you will have to add a line like this to your sources.list file:
-
-`deb http://my-hostname:listenPort/ stable main`
-
-`my-hostname` should be the actual hostname/IP where you are running deb-simple and `listenPort` will be whatever you set in the config. By default deb-simple puts everything into the `stable` distro and `main` section but these can be changed in the config. If you have enabled SSL you will want to swap `http` for `https`.
-
-# Package Signing
-
-deb-simple can sign the package release file for you, which will stop `apt-get` from complaining about insecure sources when you update. To do this you need to enable it in the config file by setting `enableSigning` to `true`, and `privateKey` to the path to your GPG signing key.
-
-If you don't have an existing key deb-simple can help generate one for you. Run:
 ```
-./deb-simple -k -kn "My Name" -ke "my.email@provider.com"
+# this generates signer.key and signer.pub in local dir
+simpledeb key --name "My Name" --email "me@example.com"
+
+# this adds the new pub key as trusted by apt
+cat signer.pub | apt-key add -
+
+# this generates the apt metadata hierarchy based on the passed-in debs
+simpledeb build input/*.deb
+
+tree .
+# .
+# ├── input
+# │   ├── example_v0.0.5-next_linux_386.deb
+# │   └── example_v0.0.5-next_linux_amd64.deb
+# ├── repo
+# │   └── dists
+# │       └── stable
+# │           ├── InRelease
+# │           ├── Release
+# │           ├── Release.gpg
+# │           └── main
+# │               ├── binary-amd64
+# │               │   ├── Packages
+# │               │   ├── Packages.gz
+# │               │   └── example_v0.0.5-next_linux_amd64.deb
+# │               └── binary-i386
+# │                   ├── Packages
+# │                   ├── Packages.gz
+# │                   └── example_v0.0.5-next_linux_386.deb
+# ├── signer.key
+# └── signer.pub
+# 
+# 7 directories, 13 files
+
+# now if you served the contents of `repo` at example.com, you could add this to your 
+# sources.list:
+echo 'deb http://example.com/ stable main' >> /etc/apt/sources.list 
 ```
 
-This will produce two files in the current directory: `public.key` and `private.key`. I suggest putting `public.key` in the repository root somewhere so it can be downloaded by clients that need it, and putting `private.key` somewhere
-relatively secure on the file system.
+Note that simpledeb is "additive". When you run it a second time, it won't _remove_
+any files from the existing repo, it will only ever add to the collection.
 
-To add your new key on a client run the following command:
-```
-wget -qO - http://my-hostname:listenPort/public.key | sudo apt-key add -
-```
+# Acknowledgements
 
-This uses Go's native `openpgp` library, so key support is cross platform, and doesn't require or interact with any
-existing keyring on the system.
-
-# Using API keys:
-
-deb-simple supports the idea of an API key to limit who can upload and delete packages. To use the API keys feature you first need to enable it in the config file by setting `enableAPIKeys` to `true`. Once that is done you'll need to generate at least one API key. To do that just run `deb-simpled -g` and an API key will be printed to stdout. 
-
-Now that you have a key you'll need to include it in your `POST` and `DELETE` requests by simply adding on the `key` URL parameter. An example for an upload might look like:
-
-`curl -XPOST 'http://localhost:9090/upload?arch=amd64&distro=stable&section=main&key=MY_BIG_API_KEY' -F "file=@myapp.deb"`
-
-A delete would look like:
-
-`curl -XDELETE 'http://localhost:9090/delete?key=MY_BIG_API_KEY' -d '{"filename":"myapp.deb","distroName":"stable","arch":"amd64", "section":"main"}'`
-
-If you want an automatable service which builds you packages, either manualy or via CI/CD, checkout [debpkg](https://github.com/xor-gate/debpkg), 
-which makes it very easy to create complex packages with almost no work.  
-
-If you want to continuous deliver created packages to deb-simple server, it is not recommended to place the key 
-somewhere others could find it. You can use [deb-simple-cd-helper](https://github.com/paulkramme/deb-simple-cd-help),
-which allows you to place a plaintext file with the api key somewhere on your build server without the need to expose it.
-
-
-# Do you use this?
-
-If you use deb-simple somewhere I'd love to hear about it! Make a PR to add your company/group/cult :)
-
-
-
-# License:
-
-[MIT](LICENSE.txt) so go crazy
+This project is a fork of [`esell/deb-simple`](https://github.com/esell/deb-simple),
+who did all the hard work. Any useful is thanks to them, any bugs are probably my
+own work.
