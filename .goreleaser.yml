@@ -1,0 +1,38 @@
+# This is an example goreleaser.yaml file with some sane defaults.
+# Make sure to check the documentation at http://goreleaser.com
+builds:
+- env:
+  - CGO_ENABLED=0
+archive:
+  replacements:
+    darwin: Darwin
+    linux: Linux
+    windows: Windows
+    386: i386
+    amd64: x86_64
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
+nfpm:
+  vendor: Aidan Steele
+  homepage: https://github.com/aidansteele/simpledeb
+  maintainer: Aidan Steele <aidan.steele@glassechidna.com.au>
+  description: simpledeb aims to be the simplest way to create an apt repo from a collection of .deb files.
+  formats:
+    - deb
+brew:
+  github:
+    owner: aidansteele
+    name: simpledeb
+  commit_author:
+    name: Aidan Steele
+    email: aidan.steele@glassechidna.com.au
+  homepage: https://github.com/aidansteele/simpledeb
+  description: simpledeb aims to be the simplest way to create an apt repo from a collection of .deb files.
