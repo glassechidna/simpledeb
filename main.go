@@ -1,6 +1,6 @@
 package main
 
-import "github.com/aidansteele/simpledeb/cmd"
+import "github.com/glassechidna/simpledeb/cmd"
 
 func main() {
 	cmd.RootCmd.Execute()

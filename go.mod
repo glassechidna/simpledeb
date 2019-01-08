@@ -1,4 +1,4 @@
-module github.com/aidansteele/simpledeb
+module github.com/glassechidna/simpledeb
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect

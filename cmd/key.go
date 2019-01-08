@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/aidansteele/simpledeb/pkg/simpledeb"
+	"github.com/glassechidna/simpledeb/pkg/simpledeb"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"io/ioutil"

@@ -22,17 +22,17 @@ changelog:
     - '^test:'
 nfpm:
   vendor: Aidan Steele
-  homepage: https://github.com/aidansteele/simpledeb
+  homepage: https://github.com/glassechidna/simpledeb
   maintainer: Aidan Steele <aidan.steele@glassechidna.com.au>
   description: simpledeb aims to be the simplest way to create an apt repo from a collection of .deb files.
   formats:
     - deb
 brew:
   github:
-    owner: aidansteele
+    owner: glassechidna
     name: simpledeb
   commit_author:
     name: Aidan Steele
     email: aidan.steele@glassechidna.com.au
-  homepage: https://github.com/aidansteele/simpledeb
+  homepage: https://github.com/glassechidna/simpledeb
   description: simpledeb aims to be the simplest way to create an apt repo from a collection of .deb files.
