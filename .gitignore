@@ -1,7 +1,6 @@
 repo/
 conf.json
 *.pprof
-pkg/
 bin/
 vendor.orig/
 deb-simple

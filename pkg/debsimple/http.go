@@ -1,4 +1,4 @@
-package main
+package debsimple
 
 import (
 	"encoding/json"
@@ -20,7 +20,7 @@ type deleteObj struct {
 	Section    string
 }
 
-func uploadHandler(config conf, db *bolt.DB) http.Handler {
+func uploadHandler(config Conf, db *bolt.DB) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("%s %s %s\n", r.RemoteAddr, r.Method, r.URL)
 		if r.Method != "POST" {
@@ -83,7 +83,7 @@ func uploadHandler(config conf, db *bolt.DB) http.Handler {
 	})
 }
 
-func deleteHandler(config conf, db *bolt.DB) http.Handler {
+func deleteHandler(config Conf, db *bolt.DB) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("%s %s %s\n", r.RemoteAddr, r.Method, r.URL)
 		if r.Method != "DELETE" {

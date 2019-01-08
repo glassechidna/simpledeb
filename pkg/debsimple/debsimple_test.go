@@ -1,4 +1,4 @@
-package main
+package debsimple
 
 import (
 	"io/ioutil"
@@ -15,7 +15,7 @@ func TestCreateDirs(t *testing.T) {
 	if err != nil {
 		t.Errorf("Unable to get current working directory: %s", err)
 	}
-	config := conf{ListenPort: "9666", RootRepoPath: pwd + "/testing", SupportArch: []string{"cats", "dogs"}, DistroNames: []string{"stable"}, Sections: []string{"main", "blah"}, EnableSSL: false}
+	config := Conf{ListenPort: "9666", RootRepoPath: pwd + "/testing", SupportArch: []string{"cats", "dogs"}, DistroNames: []string{"stable"}, Sections: []string{"main", "blah"}, EnableSSL: false}
 	// sanity check...
 	if config.RootRepoPath != pwd+"/testing" {
 		t.Errorf("RootRepoPath is %s, should be %s\n ", config.RootRepoPath, pwd+"/testing")

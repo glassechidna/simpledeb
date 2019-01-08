@@ -1,4 +1,4 @@
-package main
+package debsimple
 
 import (
 	"bytes"
@@ -39,7 +39,7 @@ func TestCreateRelease(t *testing.T) {
 	if err != nil {
 		t.Errorf("Unable to get current working directory: %s", err)
 	}
-	config := conf{ListenPort: "9666", RootRepoPath: pwd + "/testing", SupportArch: []string{"cats", "dogs"}, DistroNames: []string{"stable"}, Sections: []string{"main", "blah"}, EnableSSL: false, EnableSigning: true, PrivateKey: pwd + "/testing/private.key"}
+	config := Conf{ListenPort: "9666", RootRepoPath: pwd + "/testing", SupportArch: []string{"cats", "dogs"}, DistroNames: []string{"stable"}, Sections: []string{"main", "blah"}, EnableSSL: false, EnableSigning: true, PrivateKey: pwd + "/testing/private.key"}
 
 	// do not use the built-in createDirs() in case it is broken
 	if err := os.MkdirAll(config.RootRepoPath+"/dists/stable/main/binary-cats", 0755); err != nil {
@@ -138,7 +138,7 @@ func TestSignRelease(t *testing.T) {
 
 	createKeyHandler(pwd+"/testing", "deb-simple Test", "deb-simple@go.go")
 
-	config := conf{ListenPort: "9666", RootRepoPath: pwd + "/testing", SupportArch: []string{"cats"}, DistroNames: []string{"stable"}, Sections: []string{"main"}, EnableSSL: false, EnableSigning: true, PrivateKey: pwd + "/testing/private.key"}
+	config := Conf{ListenPort: "9666", RootRepoPath: pwd + "/testing", SupportArch: []string{"cats"}, DistroNames: []string{"stable"}, Sections: []string{"main"}, EnableSSL: false, EnableSigning: true, PrivateKey: pwd + "/testing/private.key"}
 
 	origPackages, err := os.Open("samples/Packages.gz")
 	if err != nil {

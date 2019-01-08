@@ -1,4 +1,4 @@
-package main
+package debsimple
 
 import (
 	"archive/tar"
@@ -81,7 +81,7 @@ func inspectPackageControl(filename bytes.Buffer) (string, error) {
 		case tar.TypeDir:
 			continue
 		case tar.TypeReg:
-			if name == "./control" {
+			if name == "control" {
 				io.Copy(&controlBuf, tarReader)
 				return strings.TrimRight(controlBuf.String(), "\n") + "\n", nil
 			}
@@ -95,7 +95,7 @@ func inspectPackageControl(filename bytes.Buffer) (string, error) {
 	return "", nil
 }
 
-func createPackagesGz(config conf, distro, section, arch string) error {
+func createPackagesGz(config Conf, distro, section, arch string) error {
 
 	if *verbose {
 		log.Printf("Rebuilding Packages.gz file for %s %s %s", distro, section, arch)

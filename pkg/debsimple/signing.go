@@ -1,4 +1,4 @@
-package main
+package debsimple
 
 import (
 	"bytes"
@@ -21,7 +21,7 @@ import (
 
 // createRelease scans for Packages files and builds a Release file summary, then signs it with a key.
 // Both Packages and Packages.gz files are included and hashed.
-func createRelease(config conf, distro string) error {
+func createRelease(config Conf, distro string) error {
 
 	if *verbose {
 		log.Printf("Creating release file for \"%s\"", distro)
@@ -106,7 +106,7 @@ func createRelease(config conf, distro string) error {
 // signRelease takes the path to an existing Release file, and signs it with the configured private key.
 // Both Release.gpg (detached signature) and InRelease (inline signature) will be generated, in order to
 // ensure maximum compatibility
-func signRelease(config conf, filename string) error {
+func signRelease(config Conf, filename string) error {
 
 	if *verbose {
 		log.Printf("Signing release file \"%s\"", filename)
